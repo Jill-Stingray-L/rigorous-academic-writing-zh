@@ -1,0 +1,4 @@
+interface:
+  display_name: "严谨中文科研写作"
+  short_description: "校准证据、方法结果闭环、术语、结构与中文科研表达"
+  default_prompt: "使用 $rigorous-academic-writing-zh 审阅或修订这份中文论文或研究报告，保持事实与引用边界，并按问题驱动和最小修改原则处理。"
