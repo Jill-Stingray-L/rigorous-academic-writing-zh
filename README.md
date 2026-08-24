@@ -1,5 +1,9 @@
+<h1 align="center">严谨中文科研写作</h1>
+
+<p align="center">守住事实与引用边界，再改善论证、结构与表达。</p>
+
 <p align="center">
-  <img src="./assets/readme/hero.svg" width="100%" alt="严谨中文科研写作：以事实与证据为起点，闭合研究问题、方法、结果与主张">
+  <img src="./assets/readme/hero.webp" width="100%" alt="论文页面、证据链、审校批注与放大镜组成的中文科研写作审校场景">
 </p>
 
 面向中文科学论文、学位论文、研究报告和技术报告的 Codex Skill。它把事实保护、证据边界和研究问题放在语言润色之前，帮助作者完成局部润色、深度修订、反馈整合与终稿审计。
@@ -86,7 +90,7 @@ rigorous-academic-writing-zh/
 ├── agents/openai.yaml               # Codex 界面元数据
 ├── scripts/audit_academic_zh.py     # 确定性审计脚本
 ├── references/                      # 按任务需要加载的规范
-└── assets/readme/hero.svg           # GitHub README 视觉资产
+└── assets/readme/hero.webp          # GitHub README 视觉资产
 ```
 
 ## 设计边界
