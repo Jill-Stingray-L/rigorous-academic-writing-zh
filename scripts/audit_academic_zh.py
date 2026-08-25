@@ -108,7 +108,7 @@ PATTERNS: tuple[tuple[str, str, re.Pattern[str], str], ...] = (
         "THROAT_CLEARING",
         "style",
         re.compile(r"^\s*(?:随着.{0,30}(?:发展|推进|变化)|在(?:当今|当前).{0,30}背景下|众所周知|在深入讨论.{0,20}之前|值得注意的是)"),
-        "段首可能存在无信息铺垫；检查其是否提供必要背景、范围或条件。",
+        "段首可能存在无信息铺垫；检查其是否提供必要背景、范围或条件；评价性起笔还应确认评论对象能在本句或紧邻上下文唯一识别。",
     ),
     (
         "DEFENSIVE_CLARIFICATION",
@@ -405,7 +405,7 @@ def audit_sentence_shape(lines: Sequence[str], long_sentence: int) -> list[Findi
                         "LONG_SENTENCE",
                         "statistical",
                         line_number,
-                        f"句子约 {visible_length(stripped)} 字且包含多层标点；按判断边界复核是否需要拆分。",
+                        f"句子约 {visible_length(stripped)} 字且包含多层标点；长句本身不是问题，仅复核多层判断、标点和限定关系是否难以理解。",
                         compact_excerpt(stripped),
                     )
                 )
@@ -464,7 +464,7 @@ def audit_rhythm(
                     "UNIFORM_SENTENCE_RHYTHM",
                     "statistical",
                     window[0][0],
-                    f"连续 {sentence_window} 句长度为 {lengths}，变异系数较低；检查节奏是否服从信息关系。",
+                    f"连续 {sentence_window} 句长度为 {lengths}，变异系数较低；长度本身不是问题，仅检查句法骨架、信息功能或推进方式是否机械重复。",
                     compact_excerpt(" ".join(item[1] for item in window)),
                 )
             )
@@ -483,7 +483,7 @@ def audit_rhythm(
                     "UNIFORM_PARAGRAPH_LENGTH",
                     "statistical",
                     window[0][0],
-                    f"连续 {paragraph_window} 段长度为 {lengths}，变异系数较低；检查段落功能是否机械同构。",
+                    f"连续 {paragraph_window} 段长度为 {lengths}，变异系数较低；长度本身不是问题，仅检查段落功能和组织方式是否机械同构。",
                     compact_excerpt(" | ".join(item[1] for item in window)),
                 )
             )

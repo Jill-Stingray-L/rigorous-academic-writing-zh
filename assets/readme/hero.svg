@@ -1,0 +1,111 @@
+<svg xmlns="http://www.w3.org/2000/svg"
+     width="1200" height="420" viewBox="0 0 1200 420"
+     role="img" aria-labelledby="title desc">
+  <title id="title">严谨中文科研写作</title>
+  <desc id="desc">面向中文论文与研究报告的审校 Skill。左侧为项目名称与审校重点，右侧为带批注的稿件和问题、方法、结果、结论证据链。</desc>
+
+  <rect width="1200" height="420" rx="26" fill="#F3EFE7"/>
+  <path d="M630 34V386" stroke="#D7D0C5" stroke-width="1.5"/>
+
+  <g id="title-block" transform="translate(58 50)">
+    <text x="0" y="0" fill="#6C7165" font-size="18" font-weight="600"
+          font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace"
+          letter-spacing="2">CODEX SKILL / ACADEMIC CHINESE</text>
+
+    <text x="0" y="78" fill="#1B1D1A" font-size="58" font-weight="680"
+          font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif">严谨中文科研写作</text>
+
+    <text x="0" y="132" fill="#454942" font-size="24" font-weight="450"
+          font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif">核对事实、引用与论证关系</text>
+    <text x="0" y="168" fill="#454942" font-size="24" font-weight="450"
+          font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif">在证据范围内修订结构和表达</text>
+
+    <g id="audit-priorities" transform="translate(0 224)">
+      <text x="0" y="0" fill="#9A4A2D" font-size="18" font-weight="650"
+            font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace"
+            letter-spacing="1.5">AUDIT ORDER</text>
+      <path d="M0 28H500" stroke="#CBC4B8" stroke-width="1.5"/>
+
+      <g transform="translate(0 52)" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif">
+        <circle cx="8" cy="-6" r="7" fill="#9A4A2D"/>
+        <text x="28" y="0" fill="#292C28" font-size="20">事实与引用</text>
+
+        <path d="M148 -6H185" stroke="#9BA08F" stroke-width="2"/>
+        <path d="M180 -11L187 -6L180 -1" fill="none" stroke="#9BA08F" stroke-width="2"/>
+
+        <circle cx="206" cy="-6" r="7" fill="#66705C"/>
+        <text x="226" y="0" fill="#292C28" font-size="20">论证</text>
+
+        <path d="M292 -6H329" stroke="#9BA08F" stroke-width="2"/>
+        <path d="M324 -11L331 -6L324 -1" fill="none" stroke="#9BA08F" stroke-width="2"/>
+
+        <circle cx="350" cy="-6" r="7" fill="#66705C"/>
+        <text x="370" y="0" fill="#292C28" font-size="20">结构</text>
+
+        <path d="M436 -6H473" stroke="#9BA08F" stroke-width="2"/>
+        <path d="M468 -11L475 -6L468 -1" fill="none" stroke="#9BA08F" stroke-width="2"/>
+
+        <circle cx="494" cy="-6" r="7" fill="#66705C"/>
+        <text x="514" y="0" fill="#292C28" font-size="20">表达</text>
+      </g>
+    </g>
+  </g>
+
+  <g id="annotated-manuscript" transform="translate(676 42)">
+    <rect x="12" y="12" width="454" height="336" rx="16" fill="#DCD6CC"/>
+    <rect width="454" height="336" rx="16" fill="#FBF9F4" stroke="#BEB7AB" stroke-width="1.5"/>
+
+    <text x="28" y="34" fill="#73786D" font-size="18" font-weight="650"
+          font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace"
+          letter-spacing="1.3">EVIDENCE / ARGUMENT AUDIT</text>
+    <text x="399" y="34" fill="#9A4A2D" font-size="18" font-weight="650"
+          font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace">04</text>
+    <path d="M28 50H426" stroke="#D4CEC3" stroke-width="1.5"/>
+
+    <g id="manuscript-lines" fill="#C3BDB2">
+      <rect x="45" y="76" width="280" height="7" rx="3.5"/>
+      <rect x="45" y="94" width="340" height="7" rx="3.5"/>
+      <rect x="45" y="112" width="247" height="7" rx="3.5"/>
+      <rect x="45" y="148" width="326" height="7" rx="3.5"/>
+      <rect x="45" y="166" width="292" height="7" rx="3.5"/>
+      <rect x="45" y="184" width="358" height="7" rx="3.5"/>
+    </g>
+
+    <g id="annotations" fill="none" stroke="#A74B2C" stroke-width="2">
+      <path d="M31 68H21V124H31"/>
+      <path d="M393 140H407V192H393"/>
+      <path d="M298 104L325 104"/>
+      <circle cx="336" cy="104" r="4" fill="#A74B2C" stroke="none"/>
+    </g>
+
+    <g id="evidence-chain" transform="translate(36 232)"
+       font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif">
+      <text x="0" y="-18" fill="#73786D" font-size="18" font-weight="600">审校链</text>
+      <path d="M37 22H340" stroke="#BFC3B6" stroke-width="2"/>
+
+      <g transform="translate(0 0)">
+        <circle cx="37" cy="22" r="20" fill="#F7F4ED" stroke="#9A4A2D" stroke-width="2"/>
+        <text x="37" y="29" text-anchor="middle" fill="#30332E" font-size="20" font-weight="600">问</text>
+        <text x="37" y="62" text-anchor="middle" fill="#555A51" font-size="18">问题</text>
+      </g>
+
+      <g transform="translate(101 0)">
+        <circle cx="37" cy="22" r="20" fill="#F7F4ED" stroke="#66705C" stroke-width="2"/>
+        <text x="37" y="29" text-anchor="middle" fill="#30332E" font-size="20" font-weight="600">法</text>
+        <text x="37" y="62" text-anchor="middle" fill="#555A51" font-size="18">方法</text>
+      </g>
+
+      <g transform="translate(202 0)">
+        <circle cx="37" cy="22" r="20" fill="#F7F4ED" stroke="#66705C" stroke-width="2"/>
+        <text x="37" y="29" text-anchor="middle" fill="#30332E" font-size="20" font-weight="600">果</text>
+        <text x="37" y="62" text-anchor="middle" fill="#555A51" font-size="18">结果</text>
+      </g>
+
+      <g transform="translate(303 0)">
+        <circle cx="37" cy="22" r="20" fill="#66705C" stroke="#66705C" stroke-width="2"/>
+        <text x="37" y="29" text-anchor="middle" fill="#FBF9F4" font-size="20" font-weight="600">论</text>
+        <text x="37" y="62" text-anchor="middle" fill="#555A51" font-size="18">结论</text>
+      </g>
+    </g>
+  </g>
+</svg>

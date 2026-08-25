@@ -16,8 +16,11 @@
 - [petergyang/no-ai-slop](https://github.com/petergyang/no-ai-slop)
 - [cangtianhuang/humanizer-academic-zh](https://github.com/cangtianhuang/humanizer-academic-zh)
 - [henmuc/codex-academic-humanizer](https://github.com/henmuc/codex-academic-humanizer)
+- [larashero3-dotcom/lieflat-less-ai-tone](https://github.com/larashero3-dotcom/lieflat-less-ai-tone)
 
 相关材料为中文翻译腔、术语稳定、概念标签、强结论、章节语体、引用保护和最小修改提供候选检查项。
+
+其中 `lieflat-less-ai-tone` 提供中文人类文本与多模型生成文本的候选风格特征对照，用于区分统计差异与可执行写作规则。相关结果只用于排除或弱化缺乏独立写作质量依据的表面形式规则，不作为作者身份判断依据。
 
 ## 三、作者风格与节奏检查
 
