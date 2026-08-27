@@ -89,8 +89,17 @@ PATTERNS: tuple[tuple[str, str, re.Pattern[str], str], ...] = (
     (
         "NEGATIVE_PARALLEL",
         "style",
-        re.compile(r"不仅.{0,50}(?:而且|更是)|不只是.{0,50}而是|不是.{0,50}而是"),
-        "存在否定式对比或排比；确认直接陈述目标状态是否更清楚。",
+        re.compile(
+            r"不仅.{0,50}(?:而且|更是)"
+            r"|不只是.{0,50}而是"
+            r"|(?:不是|并非).{0,50}而是"
+            r"|不属于.{0,50}而属于"
+            r"|不等同于.{0,60}(?:也|亦)?不等同于"
+            r"|(?:无法|不能).{0,50}只能"
+            r"|不能.{0,40}(?:声称|认定|视为|理解为)"
+            r"|不(?:意味着|表示|构成)"
+        ),
+        "存在否定式对比、边界或定义表达；检查这些排除是否具有独立论证价值。若只是绕行定义，优先直接陈述对象、条件或目标状态；真实证据边界和限制保留。",
     ),
     (
         "COMMAND_TONE",
@@ -223,6 +232,10 @@ DISPLAY_REF_RE = re.compile(
     re.I,
 )
 SENTENCE_SPLIT_RE = re.compile(r"(?<=[。！？!?])")
+NEGATION_BOUNDARY_RE = re.compile(
+    r"不能理解为|不能(?:声称|认定|视为)|不等同于|不意味着|不属于|不构成|不表示"
+    r"|不得|不应|不宜|无法|并非|不是|不能"
+)
 CONNECTOR_RE = re.compile(
     r"^(首先|其次|再次|最后|此外|同时|因此|然而|其中|进一步|具体而言|总体而言|综上所述|由此可见)[，,：:]?"
 )
@@ -521,6 +534,31 @@ def audit_connectors(paragraphs: Sequence[tuple[int, str]], window_size: int = 6
             index += len(window)
         else:
             index += 1
+    return findings
+
+
+def audit_negative_density(paragraphs: Sequence[tuple[int, str]]) -> list[Finding]:
+    findings: list[Finding] = []
+    for line, paragraph in paragraphs:
+        sentences = [
+            sentence.strip()
+            for sentence in SENTENCE_SPLIT_RE.split(paragraph)
+            if visible_length(sentence.strip()) >= 6
+        ]
+        if len(sentences) < 3:
+            continue
+        marked_sentences = [sentence for sentence in sentences if NEGATION_BOUNDARY_RE.search(sentence)]
+        marker_count = sum(len(NEGATION_BOUNDARY_RE.findall(sentence)) for sentence in sentences)
+        if len(marked_sentences) >= 2 and marker_count >= 3:
+            findings.append(
+                Finding(
+                    "HIGH_NEGATION_DENSITY",
+                    "statistical",
+                    line,
+                    "本段多个主要判断通过否定边界表达；逐句确认这些排除是否都是必要论证。能够直接定义对象、条件、规则或处理方式的内容优先正向表达；真实限制和证据边界保留。",
+                    compact_excerpt(paragraph),
+                )
+            )
     return findings
 
 
@@ -874,6 +912,7 @@ def main() -> int:
             args.minimum_paragraph_chars,
         )
         + audit_connectors(paragraphs)
+        + audit_negative_density(paragraphs)
         + audit_translation_patterns(paragraphs)
         + audit_glossary(content_lines, glossary)
         + audit_method_acronym_candidates(content_lines)
