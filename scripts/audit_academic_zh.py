@@ -153,7 +153,7 @@ FIXED_METHOD_TERMS = (
     "扎根理论",
 )
 
-METHOD_TRIGGER_RE = re.compile(r"采用|运用|使用|应用|进行|开展|基于")
+METHOD_TRIGGER_RE = re.compile(r"采用|运用|使用|应用(?!型)|进行|开展|基于")
 METHOD_SUFFIXES = (
     "回归分析",
     "分析法",
@@ -222,6 +222,12 @@ CITATION_RE = re.compile(
     r"|（[A-Za-z\u4e00-\u9fff][^（）]{0,45}[，,]?\s*(?:19|20)\d{2}[a-z]?）"
 )
 HEADING_RE = re.compile(r"^(#{1,6})\s+(.+?)\s*$")
+HEADING_NUMBER_PREFIX_RE = re.compile(r"^(?:\d+(?:\.\d+)+\s*|\d+\s+)")
+HEADING_NUMBER_SPACING_RE = re.compile(r"^\d+(?:\.\d+)+(?=\S)")
+PLAIN_NUMBERED_HEADING_RE = re.compile(r"^\s*(?P<number>\d+(?:\.\d+)*)(?P<space>\s*)(?P<title>\S.*)\s*$")
+HEADING_COORDINATION_RE = re.compile(r"以及|、|，|,|与|及|和")
+HEADING_COMPLETION_RE = re.compile(r"实施|运行|成效|验证|完成")
+HEADING_PLANNING_RE = re.compile(r"计划|预期|拟|安排|设计")
 CAPTION_RE = re.compile(
     r"^\s*(图|表)\s*([0-9０-９]+(?:\s*[-—.．]\s*[0-9０-９]+)*)"
     r"(?:\s+|[：:.、]\s*).{1,120}$",
@@ -788,6 +794,104 @@ def audit_displays(lines: Sequence[str]) -> tuple[list[Finding], list[str]]:
     return findings, sorted(captions)
 
 
+def heading_core(title: str) -> str:
+    return HEADING_NUMBER_PREFIX_RE.sub("", title).strip()
+
+
+def extract_heading_records(lines: Sequence[str]) -> list[tuple[int, int, str, str]]:
+    records: list[tuple[int, int, str, str]] = []
+    for number, line in enumerate(lines, 1):
+        match = HEADING_RE.match(line)
+        if match:
+            title = match.group(2).strip()
+            records.append((number, len(match.group(1)), title, heading_core(title)))
+    if records:
+        return records
+
+    for line_number, line in enumerate(lines, 1):
+        match = PLAIN_NUMBERED_HEADING_RE.match(line)
+        if not match:
+            continue
+        section_number = match.group("number")
+        separator = match.group("space")
+        if "." not in section_number and not separator:
+            continue
+        title_text = re.sub(r"\s+\d+\s*$", "", match.group("title")).strip()
+        if not title_text or re.search(r"[。！？!?]", title_text) or len(title_text) > 80:
+            continue
+        title = f"{section_number}{separator}{title_text}"
+        records.append((line_number, section_number.count(".") + 1, title, title_text))
+    return records
+
+
+def audit_headings(lines: Sequence[str]) -> list[Finding]:
+    headings = extract_heading_records(lines)
+    findings: list[Finding] = []
+    repeated_suffixes: dict[tuple[int, str], tuple[int, str]] = {}
+
+    for number, level, title, core in headings:
+        if HEADING_NUMBER_SPACING_RE.match(title):
+            findings.append(
+                Finding(
+                    "HEADING_NUMBER_SPACING",
+                    "deterministic",
+                    number,
+                    "标题编号后缺少空格；按目标模板统一编号与标题的分隔。",
+                    compact_excerpt(title),
+                )
+            )
+
+        coordination_count = len(HEADING_COORDINATION_RE.findall(core))
+        if coordination_count >= 2:
+            findings.append(
+                Finding(
+                    "HEADING_COORDINATION_DENSE",
+                    "structural",
+                    number,
+                    f"标题含 {coordination_count} 个并列连接线索；核对各项是对象、步骤、成果还是用途，并判断能否由上级标题承担共同语境。",
+                    compact_excerpt(title),
+                )
+            )
+
+        if "的" in core:
+            suffix = core.split("的", 1)[1].strip()
+            key = (level, suffix)
+            if visible_length(suffix) >= 6 and key in repeated_suffixes:
+                first_line, first_title = repeated_suffixes[key]
+                findings.append(
+                    Finding(
+                        "HEADING_TEMPLATE_REPEAT",
+                        "structural",
+                        number,
+                        f"与 L{first_line} 标题重复后缀“{suffix}”；检查这是必要的平行框架，还是掩盖了两节各自的新增信息。",
+                        compact_excerpt(f"{first_title} / {title}"),
+                    )
+                )
+            else:
+                repeated_suffixes.setdefault(key, (number, title))
+
+    stack: list[tuple[int, int, str, str]] = []
+    for item in headings:
+        number, level, title, core = item
+        while stack and stack[-1][1] >= level:
+            stack.pop()
+        if stack:
+            parent_number, _, parent_title, parent_core = stack[-1]
+            if HEADING_COMPLETION_RE.search(parent_core) and HEADING_PLANNING_RE.search(core):
+                findings.append(
+                    Finding(
+                        "HEADING_STATUS_MIX",
+                        "semantic-lead",
+                        number,
+                        f"父标题 L{parent_number} 含实施或完成性表达，子标题含计划性表达；核对项目究竟处于设计、执行还是验收状态。",
+                        compact_excerpt(f"{parent_title} / {title}"),
+                    )
+                )
+        stack.append(item)
+
+    return findings
+
+
 def audit_sections(lines: Sequence[str], minimum_chars: int) -> list[Finding]:
     headings: list[tuple[int, int, str]] = []
     for index, line in enumerate(lines):
@@ -803,16 +907,19 @@ def audit_sections(lines: Sequence[str], minimum_chars: int) -> list[Finding]:
         if has_child:
             continue
         body = lines[index + 1 : next_index]
-        prose_lines = [
+        content_lines = [
             line.strip()
             for line in body
             if line.strip()
-            and not line.lstrip().startswith(("#", "|", "![", "- ", "* ", "+ "))
-            and not re.match(r"^\d+[.)、]\s+", line.strip())
+            and not line.lstrip().startswith(("#", "!["))
+            and not re.match(
+                r"^\s*\|?\s*:?-{3,}:?\s*(?:\|\s*:?-{3,}:?\s*)+\|?\s*$",
+                line,
+            )
             and not CAPTION_RE.match(line)
         ]
-        prose = "".join(prose_lines)
-        length = visible_length(prose)
+        content = "".join(content_lines)
+        length = visible_length(content)
         if length < minimum_chars:
             findings.append(
                 Finding(
@@ -894,6 +1001,12 @@ def main() -> int:
     source_lines = text.splitlines()
     active_lines = mask_fenced_code(source_lines)
     content_lines = mask_reference_sections(active_lines)
+    heading_records = extract_heading_records(active_lines)
+    heading_line_numbers = {item[0] for item in heading_records}
+    content_lines = [
+        "" if number in heading_line_numbers else line
+        for number, line in enumerate(content_lines, 1)
+    ]
     has_markdown_headings = any(HEADING_RE.match(line) for line in active_lines)
     glossary = load_glossary(args.glossary)
     paragraphs = list(iter_prose_paragraphs(content_lines))
@@ -918,6 +1031,7 @@ def main() -> int:
         + audit_method_acronym_candidates(content_lines)
         + method_findings
         + display_findings
+        + audit_headings(active_lines)
         + audit_sections(active_lines, args.minimum_section_chars)
     )
 
@@ -930,6 +1044,7 @@ def main() -> int:
                 "visible_characters": visible_length("\n".join(content_lines)),
                 "prose_paragraphs": len(paragraphs),
                 "structure_scope": "markdown_heading_tree" if has_markdown_headings else "plain_text_no_heading_tree",
+                "detected_headings": len(heading_records),
                 "display_labels": display_labels,
                 "declared_methods": [asdict(item) for item in declarations],
                 "glossary_terms": len(glossary),
