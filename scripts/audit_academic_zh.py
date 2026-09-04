@@ -92,14 +92,12 @@ PATTERNS: tuple[tuple[str, str, re.Pattern[str], str], ...] = (
         re.compile(
             r"不仅.{0,50}(?:而且|更是)"
             r"|不只是.{0,50}而是"
-            r"|(?:不是|并非).{0,50}而是"
+            r"|并非.{0,50}而是"
             r"|不属于.{0,50}而属于"
             r"|不等同于.{0,60}(?:也|亦)?不等同于"
             r"|(?:无法|不能).{0,50}只能"
-            r"|不能.{0,40}(?:声称|认定|视为|理解为)"
-            r"|不(?:意味着|表示|构成)"
         ),
-        "存在否定式对比、边界或定义表达；检查这些排除是否具有独立论证价值。若只是绕行定义，优先直接陈述对象、条件或目标状态；真实证据边界和限制保留。",
+        "存在否定式对比；检查它是否表达真实分类或论证关系，还是可以直接陈述对象、条件或目标状态。",
     ),
     (
         "COMMAND_TONE",
@@ -122,8 +120,13 @@ PATTERNS: tuple[tuple[str, str, re.Pattern[str], str], ...] = (
     (
         "DEFENSIVE_CLARIFICATION",
         "semantic-lead",
-        re.compile(r"需要说明的是|这并不意味着|不能理解为|不应理解为"),
-        "存在澄清句；核对前文是否确有歧义、争议或重要边界。",
+        re.compile(
+            r"需要说明的是|这并不意味着|不能理解为|不应理解为"
+            r"|不代表|不表示|不能直接|不构成|尚不能|尚未|仍需"
+            r"|只有.{0,32}才(?:能|可)|在取得.{0,32}后"
+            r"|不是.{0,32}而是|仅用于.{0,32}不用于"
+        ),
+        "可能存在重复限定或防御性澄清；请区分必要证据边界、内部工作记录和无必要自我辩护，再决定保留、改写、移动或删除。",
     ),
     (
         "ABSTRACT_CHAIN",
@@ -241,6 +244,52 @@ SENTENCE_SPLIT_RE = re.compile(r"(?<=[。！？!?])")
 NEGATION_BOUNDARY_RE = re.compile(
     r"不能理解为|不能(?:声称|认定|视为)|不等同于|不意味着|不属于|不构成|不表示"
     r"|不得|不应|不宜|无法|并非|不是|不能"
+)
+WORKLOG_FUTURE_PATTERNS: tuple[re.Pattern[str], ...] = (
+    re.compile(r"(?:待补(?:充)?|待配置|待验证|待确认|待应用)"),
+    re.compile(r"(?:^|[，；])(?:本报告|本研究|本节|本文)?(?:下一步|后续|计划).{0,28}(?:核对|复核|检查|验证|确认|补充|配置|开展|计算|取得|比较)"),
+    re.compile(r"(?:^|[，；])(?:本报告|本研究|本节|本文)?拟(?!合).{0,24}(?:核对|复核|检查|验证|确认|补充|配置|开展|计算|取得|比较)"),
+    re.compile(r"(?:在)?取得.{0,24}后.{0,18}(?:(?:再|方|才|可|将|需|需要).{0,8})?(?:计算|核对|复核|检查|验证|确认|补充|形成|开展)"),
+    re.compile(r"实际核对应"),
+    re.compile(r"可优先开展"),
+    re.compile(r"(?:仍需|尚需|需要|待).{0,10}(?:进一步)?(?:核对|复核|检查|确认|验证|补充|配置)"),
+    re.compile(r"后续运行记录中"),
+    re.compile(r"未来试点中"),
+)
+WORKLOG_TRANSITION_EXEMPT_RE = re.compile(
+    r"后续(?:章节|第\s*[一二三四五六七八九十0-9]+\s*章|部分|小节)"
+    r".{0,16}(?:将|用于)?(?:分析|讨论|说明|介绍|呈现|阐述|检验)"
+)
+THEORY_HEADING_RE = re.compile(r"理论|概念|相关研究|文献综述|方法基础|理论基础")
+NON_THEORY_HEADING_RE = re.compile(
+    r"项目材料|材料范围|数据来源|分析结果|研究结果|案例|实施|验收|配置|应用|试点|运行"
+)
+THEORY_PROJECT_TERM_RE = re.compile(
+    r"现有材料|当前可核查|生产数据|(?:生产|运行)批次|\bDDL\b|\bSQL\b|\bETL\b(?:\s*任务)?"
+    r"|接口配置|运行日志|取得资料后|物理血缘补证",
+    re.I,
+)
+DEFENSIVE_SECTION_RE = re.compile(
+    r"不代表|不表示|不能直接|不构成|尚不能|尚未|仍需|只有.{0,32}才(?:能|可)"
+    r"|在取得.{0,32}后|待补(?:充)?|待配置|待验证|待确认|下一步|后续拟|尚需补充"
+)
+BOUNDARY_CLUSTERS: tuple[tuple[str, re.Pattern[str]], ...] = (
+    (
+        "生产事实或问题",
+        re.compile(r"(?:不代表|不表示|不构成|不能直接(?:认定|推断)?).{0,20}(?:生产|现实|实际).{0,12}(?:事实|数据|关系|问题|缺陷)"),
+    ),
+    (
+        "业务或人工确认",
+        re.compile(r"(?:仍需|尚需|需要|待).{0,12}(?:业务|专家|人工).{0,8}(?:确认|核对|验证)"),
+    ),
+    (
+        "取得运行材料后再处理",
+        re.compile(r"(?:取得|获得|补充).{0,16}(?:运行|生产|实际).{0,10}(?:数据|批次|记录).{0,24}(?:后|再|方|才|计算|核验|验证)"),
+    ),
+    (
+        "当前材料支持范围",
+        re.compile(r"(?:现有|当前)(?:材料|资料|数据).{0,28}(?:仅|只|只能|支持|不足|缺少)"),
+    ),
 )
 CONNECTOR_RE = re.compile(
     r"^(首先|其次|再次|最后|此外|同时|因此|然而|其中|进一步|具体而言|总体而言|综上所述|由此可见)[，,：:]?"
@@ -397,15 +446,157 @@ def load_glossary(path: Path | None) -> list[GlossaryTerm]:
     return entries
 
 
-def audit_patterns(lines: Sequence[str]) -> list[Finding]:
+def audit_patterns(
+    lines: Sequence[str], suppress_defensive_lines: set[int] | None = None
+) -> list[Finding]:
     findings: list[Finding] = []
+    suppressed = suppress_defensive_lines or set()
     for number, line in enumerate(lines, 1):
         for code, category, pattern, message in PATTERNS:
+            if code == "DEFENSIVE_CLARIFICATION" and number in suppressed:
+                continue
             for match in pattern.finditer(line):
                 if code == "VAGUE_ATTRIBUTION" and sentence_has_citation(line, match.start()):
                     continue
                 findings.append(Finding(code, category, number, message, compact_excerpt(line)))
     return findings
+
+
+HeadingContext = tuple[tuple[int, int, str], ...]
+
+
+def heading_context_by_line(lines: Sequence[str]) -> dict[int, HeadingContext]:
+    contexts: dict[int, HeadingContext] = {}
+    stack: list[tuple[int, int, str]] = []
+    for number, line in enumerate(lines, 1):
+        match = HEADING_RE.match(line)
+        if match:
+            level = len(match.group(1))
+            while stack and stack[-1][1] >= level:
+                stack.pop()
+            stack.append((number, level, match.group(2).strip()))
+        contexts[number] = tuple(stack)
+    return contexts
+
+
+def context_label(context: HeadingContext) -> str:
+    return " > ".join(item[2] for item in context) if context else "未识别 Markdown 章节"
+
+
+def sentence_fragments(line: str) -> Iterable[str]:
+    for sentence in SENTENCE_SPLIT_RE.split(line):
+        stripped = sentence.strip()
+        if stripped:
+            yield stripped
+
+
+def is_worklog_future_trace(sentence: str) -> bool:
+    without_transition = WORKLOG_TRANSITION_EXEMPT_RE.sub("", sentence)
+    return any(pattern.search(without_transition) for pattern in WORKLOG_FUTURE_PATTERNS)
+
+
+def audit_worklog_future(
+    lines: Sequence[str], contexts: dict[int, HeadingContext]
+) -> list[Finding]:
+    findings: list[Finding] = []
+    for number, line in enumerate(lines, 1):
+        for sentence in sentence_fragments(line):
+            if not is_worklog_future_trace(sentence):
+                continue
+            section = context_label(contexts.get(number, ()))
+            findings.append(
+                Finding(
+                    "WORKLOG_FUTURE_TRACE",
+                    "semantic-lead",
+                    number,
+                    f"“{section}”中可能把补证或下一步任务写入正文；请判断它应改为方法、配置要求或验收口径，还是移入正文外工作记录。",
+                    compact_excerpt(sentence),
+                )
+            )
+    return findings
+
+
+def audit_theory_project_leak(
+    lines: Sequence[str], contexts: dict[int, HeadingContext]
+) -> list[Finding]:
+    findings: list[Finding] = []
+    for number, line in enumerate(lines, 1):
+        context = contexts.get(number, ())
+        if not context:
+            continue
+        nearest_role = next(
+            (
+                "theory" if THEORY_HEADING_RE.search(item[2]) else "other"
+                for item in reversed(context)
+                if item[1] > 1
+                and (THEORY_HEADING_RE.search(item[2]) or NON_THEORY_HEADING_RE.search(item[2]))
+            ),
+            None,
+        )
+        if nearest_role != "theory":
+            continue
+        for sentence in sentence_fragments(line):
+            matches = sorted(set(match.group(0) for match in THEORY_PROJECT_TERM_RE.finditer(sentence)))
+            if not matches:
+                continue
+            section = context_label(context)
+            findings.append(
+                Finding(
+                    "THEORY_PROJECT_LEAK",
+                    "structural",
+                    number,
+                    f"“{section}”属于理论或方法基础语境，却出现项目执行语言（{'、'.join(matches)}）；请复核是否应移至材料、应用、实施或验收部分。",
+                    compact_excerpt(sentence),
+                )
+            )
+    return findings
+
+
+def audit_section_defensive_patterns(
+    lines: Sequence[str], contexts: dict[int, HeadingContext]
+) -> tuple[list[Finding], set[int]]:
+    section_lines: dict[tuple[int, int, str], list[tuple[int, str]]] = {}
+    for number, line in enumerate(lines, 1):
+        context = contexts.get(number, ())
+        if not context or HEADING_RE.match(line):
+            continue
+        if DEFENSIVE_SECTION_RE.search(line) or any(
+            is_worklog_future_trace(sentence) for sentence in sentence_fragments(line)
+        ):
+            section_lines.setdefault(context[-1], []).append((number, line.strip()))
+
+    findings: list[Finding] = []
+    repeated_lines: set[int] = set()
+    for (heading_line, _level, title), entries in section_lines.items():
+        distinct_entries = list(dict.fromkeys(entries))
+        repeated_cluster = False
+        combined = "\n".join(text for _, text in distinct_entries)
+        for cluster_name, pattern in BOUNDARY_CLUSTERS:
+            cluster_entries = [(line, text) for line, text in distinct_entries if pattern.search(text)]
+            if len(cluster_entries) < 2:
+                continue
+            repeated_cluster = True
+            repeated_lines.update(line for line, _text in cluster_entries)
+            findings.append(
+                Finding(
+                    "REPEATED_EVIDENCE_BOUNDARY",
+                    "semantic-lead",
+                    cluster_entries[0][0],
+                    f"“{title}”中有 {len(cluster_entries)} 处相近的“{cluster_name}”边界；这只是重复边界候选，请优先判断能否在首次合适位置集中定义并由稳定术语承接。",
+                    compact_excerpt(" | ".join(text for _, text in cluster_entries), 160),
+                )
+            )
+        if len(distinct_entries) >= 3 and not repeated_cluster:
+            findings.append(
+                Finding(
+                    "SECTION_DEFENSIVE_DENSITY",
+                    "statistical",
+                    heading_line,
+                    f"“{title}”有 {len(distinct_entries)} 个分散位置包含限制、否定、待办或补证表达；这是节级人工复核线索，先检查{'重复边界' if repeated_cluster else '各表达的章节功能和证据必要性'}，不能按词频自动删除。",
+                    compact_excerpt(" | ".join(text for _, text in distinct_entries), 160),
+                )
+            )
+    return findings, repeated_lines
 
 
 def audit_sentence_shape(lines: Sequence[str], long_sentence: int) -> list[Finding]:
@@ -1001,6 +1192,7 @@ def main() -> int:
     source_lines = text.splitlines()
     active_lines = mask_fenced_code(source_lines)
     content_lines = mask_reference_sections(active_lines)
+    heading_contexts = heading_context_by_line(active_lines)
     heading_records = extract_heading_records(active_lines)
     heading_line_numbers = {item[0] for item in heading_records}
     content_lines = [
@@ -1013,8 +1205,18 @@ def main() -> int:
 
     method_findings, declarations = audit_method_closure(content_lines)
     display_findings, display_labels = audit_displays(active_lines)
+    worklog_findings = audit_worklog_future(content_lines, heading_contexts)
+    section_defensive_findings, repeated_defensive_lines = audit_section_defensive_patterns(
+        content_lines, heading_contexts
+    )
+    suppress_defensive_lines = repeated_defensive_lines | {
+        finding.line for finding in worklog_findings
+    }
     findings = deduplicate(
-        audit_patterns(content_lines)
+        audit_patterns(content_lines, suppress_defensive_lines)
+        + worklog_findings
+        + audit_theory_project_leak(content_lines, heading_contexts)
+        + section_defensive_findings
         + audit_sentence_shape(content_lines, args.long_sentence)
         + audit_rhythm(
             paragraphs,
@@ -1038,7 +1240,7 @@ def main() -> int:
     if args.format == "json":
         payload = {
             "file": str(args.input),
-            "disclaimer": "editorial navigation only; not authorship detection, quality scoring, or an automatic rewrite decision",
+            "disclaimer": "以下结果仅为人工复核线索，不是作者身份判定、质量评分、文本错误结论或自动改写决定。",
             "document": {
                 "lines": len(source_lines),
                 "visible_characters": visible_length("\n".join(content_lines)),

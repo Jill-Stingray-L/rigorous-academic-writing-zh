@@ -66,6 +66,87 @@ class AuditAcademicZhRegressionTests(unittest.TestCase):
         self.assertIn("HEADING_NUMBER_SPACING", codes)
         self.assertIn("HEADING_STATUS_MIX", codes)
 
+    def test_forward_review_fixture_reuses_existing_structural_leads(self) -> None:
+        payload = audit_fixture("forward_review_report.md")
+        findings = payload["findings"]
+        codes = {finding["code"] for finding in findings}
+
+        self.assertIn("HEADING_TEMPLATE_REPEAT", codes)
+        self.assertIn("HEADING_STATUS_MIX", codes)
+        self.assertIn("THIN_SECTION", codes)
+        self.assertIn("WORKLOG_FUTURE_TRACE", codes)
+        self.assertFalse(
+            any(
+                finding["code"].startswith("HEADING_")
+                and "不同开放时段下近地面空气温度的采样范围与比较边界" in finding["excerpt"]
+                for finding in findings
+            )
+        )
+
+    def test_worklog_theory_leak_and_section_repetition_are_review_leads(self) -> None:
+        payload = audit_fixture("semantic_leads_positive.md")
+        findings = payload["findings"]
+        codes = {finding["code"] for finding in findings}
+
+        self.assertIn("WORKLOG_FUTURE_TRACE", codes)
+        self.assertIn("THEORY_PROJECT_LEAK", codes)
+        self.assertIn("DEFENSIVE_CLARIFICATION", codes)
+        self.assertIn("SECTION_DEFENSIVE_DENSITY", codes)
+        self.assertIn("REPEATED_EVIDENCE_BOUNDARY", codes)
+        self.assertFalse(
+            any(
+                finding["code"] == "DEFENSIVE_CLARIFICATION"
+                and finding["line"] in {19, 21, 23, 25}
+                for finding in findings
+            )
+        )
+        self.assertTrue(
+            any(
+                finding["code"] == "WORKLOG_FUTURE_TRACE"
+                and "分析结果" in finding["message"]
+                and finding["excerpt"]
+                for finding in findings
+            )
+        )
+        self.assertTrue(
+            any(
+                finding["code"] == "WORKLOG_FUTURE_TRACE"
+                and "取得数据后再计算关联成功率" in finding["excerpt"]
+                for finding in findings
+            )
+        )
+        self.assertTrue(
+            any(
+                finding["code"] == "WORKLOG_FUTURE_TRACE"
+                and "下一步核对运行数据" in finding["excerpt"]
+                for finding in findings
+            )
+        )
+        self.assertFalse(
+            any(
+                finding["code"] == "THEORY_PROJECT_LEAK"
+                and finding["line"] > 20
+                for finding in findings
+            )
+        )
+
+    def test_normal_transition_rules_methods_and_necessary_limits_are_not_new_leads(self) -> None:
+        payload = audit_fixture("semantic_leads_negative.md")
+        new_codes = {
+            finding["code"]
+            for finding in payload["findings"]
+            if finding["code"]
+            in {
+                "WORKLOG_FUTURE_TRACE",
+                "THEORY_PROJECT_LEAK",
+                "SECTION_DEFENSIVE_DENSITY",
+                "REPEATED_EVIDENCE_BOUNDARY",
+            }
+        }
+
+        self.assertEqual(set(), new_codes)
+        self.assertIn("人工复核线索", payload["disclaimer"])
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -116,7 +116,7 @@ python scripts/audit_academic_zh.py manuscript.md --format json
 python scripts/audit_academic_zh.py manuscript.md --glossary glossary.json
 ```
 
-脚本用于定位聊天或编辑残留、术语字面变体、标题并列与重复句壳、计划—实施状态混用、图表编号、长句、局部结构重复和连接词等线索。它不判断作者身份，不给论文打分，也不自动改写输入文本。
+脚本用于定位聊天或编辑残留、术语字面变体、标题并列与重复句壳、计划—实施状态混用、工作日志式未来任务、理论章节中的项目执行语言、节级重复证据边界、图表编号、长句、局部结构重复和连接词等线索。所有结果都是人工复核提示；它不判断作者身份，不给论文打分，也不自动改写输入文本。
 
 Markdown 标题树、叶节点小节和章节厚度检查只适用于 Markdown。纯文本需要进行结构审计时，应先把正式章节标题规范化为 Markdown 标题。
 
