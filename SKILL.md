@@ -38,7 +38,7 @@ description: 审阅或修订中文科学论文、学位论文、研究报告和�
 - 涉及事实、引用、证据强度或研究完整性时，读取 [研究严谨性与证据](references/rigor-and-evidence.md)。
 - 审查或修订科学论文、学位论文的结构与论证时，读取 [论文结构](references/paper-structure.md)；不能仅因文稿属于论文，就为局部语言润色加载该参考。
 - 涉及研究报告、技术报告的结构、图表或视觉语义时，读取 [报告结构与视觉语义](references/report-structure-and-visuals.md)。
-- 内容稳定后的语言终校或局部润色：读取 [中文表达模式](references/chinese-style-patterns.md)。
+- 内容稳定后的语言终校、局部润色，或终稿审计、深度修订、反馈整合中涉及文风与语言表达问题时，读取 [中文表达模式](references/chinese-style-patterns.md)，按当前任务范围审查或修订。
 - 用户提供认可的定稿样本并要求保持个人或团队风格：读取 [作者风格校准](references/style-profile.md)。
 
 只读取当前问题需要的 reference，并在用户范围内选用其中相关部分。仅在维护本 skill 或核对规则来源时读取 [设计来源](references/provenance.md)。
